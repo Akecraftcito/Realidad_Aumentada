@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
+using TMPro; // <-- Se agregó esta línea para solucionar el error
 
 public class AR_VideoController : MonoBehaviour
 {
@@ -11,10 +12,11 @@ public class AR_VideoController : MonoBehaviour
     
     void Start() {
         // Configurar eventos de botones
-    canvasGroup = arInterface.GetComponent<CanvasGroup>();
-    if (canvasGroup == null) canvasGroup = arInterface.AddComponent<CanvasGroup>();
-    arInterface.SetActive(false); // Ocultar al inicio
-    VideoInterface.SetActive(false); // Ocultar al inicio
+        playButton.onClick.AddListener(PlayVideo);
+        pauseButton.onClick.AddListener(PauseVideo);
+        
+        // Actualizar UI periódicamente
+        InvokeRepeating(nameof(UpdateUI), 0f, 0.1f);
     }
     
     public void PlayVideo() {
@@ -32,10 +34,12 @@ public class AR_VideoController : MonoBehaviour
     }
     
     private void UpdateUI() {
-        if (videoPlayer == null || !videoPlayer.prepareCompleted) return;
+        if (videoPlayer == null || !videoPlayer.isPrepared) return;
         
         // Actualizar barra de progreso
-        progressSlider.value = (float)videoPlayer.time / videoPlayer.length;
+        if (videoPlayer.length > 0) {
+            progressSlider.value = (float)(videoPlayer.time / videoPlayer.length);
+        }
         
         // Formatear tiempo: MM:SS
         string current = System.TimeSpan.FromSeconds(videoPlayer.time).ToString(@"mm\:ss");
